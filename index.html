@@ -1,0 +1,407 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="theme-color" content="#111821">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon.png">
+<link rel="apple-touch-icon" href="icon.png">
+<link rel="stylesheet" href="style.css">
+<title>Battlefront: Reforged</title>
+
+<style id="ownerAccessStyles">
+.owner-access-btn{border-color:#9ce7ff!important;background:linear-gradient(180deg,#163447,#0c1c29)!important;color:#dff8ff!important}
+.owner-badge{display:inline-flex;align-items:center;gap:6px;padding:5px 9px;border:1px solid #7ee3ff66;border-radius:999px;background:#0a1b27cc;color:#bff4ff;font-size:11px;font-weight:900;letter-spacing:.08em}
+.owner-hud{position:absolute;right:64px;bottom:18px;min-height:42px;padding:0 13px;border:1px solid #7ee3ff66;border-radius:10px;background:#0a1b27dd;color:#dff8ff;font-weight:900;z-index:8}
+.owner-window{width:min(1120px,94vw);max-height:88vh;overflow:auto}
+.owner-intro{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:10px 12px;border:1px solid #7ee3ff33;border-radius:12px;background:#0b1822}
+.owner-grid{display:grid;grid-template-columns:minmax(260px,.75fr) minmax(0,1.6fr);gap:14px;margin-top:14px}
+.owner-panel{border:1px solid #ffffff18;border-radius:12px;background:#0a0f15;padding:12px;min-width:0}
+.owner-panel h3{margin:0 0 10px}.owner-panel h4{margin:14px 0 8px}
+.owner-world-grid,.owner-form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+.owner-panel label{display:grid;gap:5px;font-size:12px;font-weight:800;min-width:0}
+.owner-panel input,.owner-panel select{width:100%;min-height:42px;box-sizing:border-box;border-radius:8px;border:1px solid #ffffff25;background:#0e1720;color:#fff;padding:7px 9px;font-size:16px}
+.owner-panel button{min-height:42px}.owner-span2{grid-column:1/-1}.owner-builder-top{display:flex;gap:8px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.owner-build-layout{display:grid;grid-template-columns:minmax(250px,.9fr) minmax(280px,1.1fr);gap:12px}
+.owner-preview-wrap{display:grid;gap:8px;align-content:start}.owner-preview-wrap canvas{position:static!important;inset:auto!important;width:100%;max-width:360px;height:auto!important;aspect-ratio:4/3;border:1px solid #ffffff1f;border-radius:10px;background:#0b1118;justify-self:center;touch-action:auto!important;display:block}
+.owner-shape-editor{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}.owner-shape-list{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}.owner-shape-list button{min-height:34px;padding:5px 8px}.owner-shape-list button.active{outline:2px solid #a8ecff}
+.owner-save-list{display:grid;gap:7px;max-height:280px;overflow:auto}.owner-save-row{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:6px;align-items:center;padding:8px;border:1px solid #ffffff16;border-radius:9px;background:#101821}.owner-save-row div{display:grid;min-width:0}.owner-save-row b,.owner-save-row small{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.owner-save-row button{min-height:34px;padding:4px 8px}.owner-empty{opacity:.7;font-size:13px;padding:10px}
+.owner-note{font-size:12px;opacity:.75;line-height:1.35}.owner-danger{border-color:#ff6e6e55!important}.owner-accent{border-color:#7ee3ff66!important;background:#103246!important}
+@media(max-width:820px){.owner-grid,.owner-build-layout{grid-template-columns:1fr}.owner-world-grid,.owner-form-grid{grid-template-columns:1fr}.owner-span2{grid-column:auto}.owner-shape-editor{grid-template-columns:repeat(2,minmax(0,1fr))}.owner-window{width:95vw;max-height:86vh}.owner-hud{right:58px;bottom:66px}}
+</style>
+</head>
+<body>
+<canvas id="game"></canvas>
+
+<div id="lobby" class="screen">
+  <div class="topbar">
+    <div class="brand-mini">BATTLEFRONT // REFORGED</div>
+    <div class="account"><span>LV <b id="accountLevel">1</b></span><span>XP <b id="accountXp">0/75</b></span><span>WINS <b id="accountWins">0</b></span><span id="ownerBadge" class="owner-badge hidden">OWNER ACCESS</span></div>
+  </div>
+
+  <div class="lobby-grid">
+    <section class="hero card">
+      <div class="kicker">TBBF-STYLE THIRD-PERSON BATTLE</div>
+      <h1>BATTLEFRONT<br><em>REFORGED</em></h1>
+      <p>You are the Tower. Or — after Level 500 — you are the Zombie. Cash buys Towers, upgrades, and one-life Zombie classes. Level gain comes from your own damage, not wins or bot work.</p><div class="milestone-strip"><span>LV 250 • ZED</span><span>LV 500 • ZOMBIE MODE + TWEETER</span><span>LV 750 • GOLDEN SCOUT + NECROMANCERS</span><span>LV 1500 • GOLDEN COMMANDO + BOSS5 + GUARDIAN</span><span>LV 2500 • ARCHER + KNIFER</span><span>LV 3000 • KINGS</span><span>LV 4000 • PLANET3ARTH</span><span>LV 5000 • COMMANDER</span><span>LV 6000 • GOLDEN ZED + LORDS</span></div>
+      <div class="eventline">
+        <div id="halloweenStatus" class="event halloween">🎃 HALLOWEEN FRONT • THROUGH NOV 1</div>
+        <div id="fallStatus" class="event fall">🍂 FALL FRONT • THROUGH DEC 1</div>
+      </div>
+    </section>
+
+    <section class="card selectors">
+      <h3>TEAM</h3>
+      <div class="seg" id="teamSelect">
+        <button class="active" data-team="tower">DEFENDERS</button>
+        <button data-team="zombie">ZOMBIES</button>
+      </div>
+
+      <h3>SERVER</h3>
+      <div class="seg" id="serverSelect">
+        <button class="active" data-server="public">PUBLIC SIMULATION</button>
+        <button data-server="private">PRIVATE SOLO • 0 BOTS</button>
+      </div>
+      <p id="serverHint" class="server-hint">Public Simulation fills empty slots with AI players.</p>
+
+      <h3>MODE</h3>
+      <div id="modeGrid" class="mode-grid">
+        <button class="mode active" data-mode="classic"><b>CLASSIC</b><span>40 waves • final Major: Void • 0 win XP</span></button>
+        <button class="mode" data-mode="hard"><b>HARDMODE</b><span>40 waves • Lords • final Major: Void2</span></button>
+        <button class="mode halloweenmode" data-mode="halloween"><b>🎃 HALLOWEEN ASSAULT</b><span>15 event waves • event Tower + Zombies</span></button>
+        <button class="mode fallmode" data-mode="fall"><b>🍂 AUTUMN SIEGE</b><span>20 event waves • event Tower + Zombies</span></button>
+        <button class="mode cursedmode" data-mode="cursed"><b>☠ CURSED</b><span>PRIVATE ONLY • randomized Towers/Zombies • no XP</span></button>
+        <button class="mode sandboxmode" data-mode="sandbox"><b>SANDBOX</b><span>PRIVATE ONLY • spawn Zombies • set wave/cash • no XP</span></button>
+      </div>
+    </section>
+
+    <section class="card maps">
+      <h3>MAP VOTE</h3>
+      <div id="mapGrid" class="map-grid"></div>
+    </section>
+
+    <section class="card roster">
+      <div class="section-head"><h3 id="rosterTitle">DEFENDER ROSTER</h3><span id="rosterHint">Choose your starting tower</span></div>
+      <div id="classGrid" class="class-grid"></div>
+    </section>
+  </div>
+
+  <div class="bottom-actions">
+    <button id="controlsBtn">CONTROLS</button>
+    <button id="eventBtn">EVENTS</button>
+    <button id="skinsBtn">SKINS</button>
+    <button id="bossIndexBtn">BOSS INDEX</button>
+    <button id="codesBtn">CODES</button>
+    <button id="ownerBtn" class="owner-access-btn hidden">OWNER ACCESS</button>
+    <button id="settingsBtn">SETTINGS</button>
+    <button id="resetBtn" class="danger">RESET SAVE</button>
+    <button id="deployBtn" class="deploy">DEPLOY TO FRONT</button>
+  </div>
+</div>
+
+<div id="hud" class="hidden">
+  <div class="hud-top">
+    <div class="hudcluster">
+      <div class="hudbox"><small>WAVE</small><b id="waveLabel">1 / 40</b></div>
+      <div class="hudbox"><small>TIME</small><b id="timerLabel">00:45</b></div>
+      <div class="hudbox"><small>CASH</small><b id="cashLabel">$650</b></div>
+      <div class="hudbox"><small>TEAM</small><b id="teamLabel">DEFENDERS</b></div>
+      <div class="hudbox"><small>XP</small><b id="xpLabel">0 / 75</b></div>
+      <div class="hudbox"><small>HORDE</small><b id="hordeLabel">0 ACTIVE</b></div>
+    </div>
+    <div class="hudcluster right">
+      <div id="candyBox" class="hudbox eventbox halloween"><small>CANDY</small><b id="candyLabel">0</b></div>
+      <div id="leafBox" class="hudbox eventbox fall"><small>LEAVES</small><b id="leafLabel">0</b></div>
+    </div>
+  </div>
+
+  <div id="bossHud" class="boss-hud hidden">
+    <div class="boss-title"><span id="bossTier">KING</span><b id="bossName">KING BOSS 1</b></div>
+    <div class="bossbar"><i id="bossFill"></i></div>
+    <small id="bossHp">1000 / 1000</small><small id="majorClock" class="major-clock hidden">MAJOR TIMER 01:30</small>
+  </div>
+
+  <div id="waveBanner" class="wave-banner"></div>
+  <div id="killfeed" class="killfeed"></div>
+
+  <div class="player-card">
+    <div class="portrait" id="portrait">D</div>
+    <div class="player-info">
+      <b id="classLabel">SCOUT</b>
+      <div class="hpbar"><i id="hpFill"></i></div>
+      <small><span id="hpText">100/100</span> • <span id="ammoText">30/30</span></small>
+      <small id="nextTowerLabel" class="next-tower">NEXT: SCOUT</small>
+    </div>
+  </div>
+
+  <div class="abilities">
+    <div><kbd>Q</kbd><span id="qLabel">DASH</span><small id="qCd">READY</small></div>
+    <div><kbd>E</kbd><span id="eLabel">ABILITY</span><small id="eCd">READY</small></div>
+    <div><kbd>R</kbd><span>RELOAD</span><small id="rCd">READY</small></div>
+    <div><kbd>F</kbd><span>UPGRADE</span><small id="upgradeLabel">LV 1/5</small></div>
+    <div><kbd>TAB</kbd><span>ROSTER</span><small>SWAP</small></div>
+    <div id="sandboxHudBtn" class="hidden"><kbd>N</kbd><span>SANDBOX</span><small>MENU</small></div>
+  </div>
+
+  <button id="ownerHudBtn" class="owner-hud hidden">OWNER</button>
+  <button id="settingsHudBtn" class="settings-hud">⚙</button>
+  <button id="leaveBtn" class="leave">LEAVE</button>
+</div>
+
+<div id="rosterOverlay" class="overlay hidden">
+  <div class="window">
+    <button class="x" data-close="rosterOverlay">×</button>
+    <div class="section-head"><h2 id="swapTitle">DEFENDERS</h2><span>Swap after respawn or anytime in Sandbox</span></div>
+    <div id="swapGrid" class="class-grid large"></div>
+  </div>
+</div>
+
+<div id="sandboxOverlay" class="overlay hidden">
+  <div class="window sandbox-window">
+    <button class="x" data-close="sandboxOverlay">×</button>
+    <div class="section-head"><h2>SANDBOX CONTROL PANEL</h2><span>Testing disables XP and wins.</span></div>
+    <div class="sandbox-grid">
+      <div class="sandbox-card">
+        <h3>WORLD</h3>
+        <label>Set Wave <input id="sandboxWave" type="number" min="1" max="40" value="1"></label>
+        <label>Set Cash <input id="sandboxCash" type="number" min="0" max="99999999" value="999999"></label>
+        <button id="applySandbox">APPLY</button>
+        <button id="toggleGod">GOD MODE: OFF</button>
+        <button id="toggleAi">BOT AI: ON</button>
+        <button id="clearZombies">KILL ALL ZOMBIES</button>
+        <button id="healAll">HEAL EVERYONE</button>
+      </div>
+      <div class="sandbox-card">
+        <h3>SPAWN ZOMBIES</h3>
+        <label>Amount <input id="spawnAmount" type="number" min="1" max="50" value="1"></label>
+        <div id="sandboxSpawnGrid" class="spawn-grid"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="controlsOverlay" class="overlay hidden">
+  <div class="window compact">
+    <button class="x" data-close="controlsOverlay">×</button>
+    <h2>CONTROLS</h2>
+    <div class="controls-grid">
+      <div><kbd>WASD</kbd><span>Move</span></div><div><kbd>MOUSE</kbd><span>Aim</span></div>
+      <div><kbd>LMB</kbd><span>Attack</span></div><div><kbd>SHIFT</kbd><span>Sprint</span></div>
+      <div><kbd>Q / E</kbd><span>Abilities</span></div><div><kbd>R</kbd><span>Reload</span></div>
+      <div><kbd>F</kbd><span>Upgrade current Tower</span></div><div><kbd>TAB</kbd><span>Buy / swap roster</span></div>
+      <div><kbd>N</kbd><span>Sandbox menu</span></div><div><kbd>O</kbd><span>Owner Access menu</span></div>
+    </div>
+    <p>On iPad/mobile, twin-stick controls and ability buttons appear automatically.</p><p><b>XP:</b> mode wins give 0 XP. Only your own damage and eliminations earn XP; bot kills do not level you.</p><p><b>Zombie purchases:</b> paid Zombie classes cost money every use and enter cooldown after death. Major bosses are normally NPC-only; the global 8B owner can play them.</p><p><b>Private Solo:</b> there are ZERO fake player bots. It is a local solo server context for grinding your own damage XP. Sandbox and Cursed are private-only. A static GitHub build cannot host real invite-only online multiplayer without a backend.</p>
+  </div>
+</div>
+
+<div id="eventOverlay" class="overlay hidden">
+ <div class="window compact">
+  <button class="x" data-close="eventOverlay">×</button>
+  <h2>LIVE EVENTS</h2>
+  <div class="event-detail halloween"><b>🎃 Halloween Front</b><p>Through Nov 1, 2026. Vote Halloween Assault for 15 dedicated event waves, event Towers/Zombies, Candy rewards, pumpkins, gravestones and Halloween bosses.</p></div>
+  <div class="event-detail fall"><b>🍂 Fall Front</b><p>Through Dec 1, 2026. Vote Autumn Siege for 20 dedicated event waves, event Towers/Zombies, Leaves, hay bales, orange trees and an Autumn Lord.</p></div>
+ </div>
+</div>
+
+
+
+<div id="skinsOverlay" class="overlay hidden">
+  <div class="window">
+    <button class="x" data-close="skinsOverlay">×</button>
+    <div class="section-head"><h2>SKINS</h2><span>Rare Anomaly clears unlock special skins.</span></div>
+    <div id="skinGrid" class="skin-grid"></div>
+  </div>
+</div>
+
+
+<div id="bossIndexOverlay" class="overlay hidden">
+  <div class="window boss-index-window">
+    <button class="x" data-close="bossIndexOverlay">×</button>
+    <div class="section-head"><h2>BOSS / ZOMBIE INDEX</h2><span>Progression families in this remake</span></div>
+    <div class="index-note">Boss1–5 and Guardian are high-tier Zombies. Kings unlock at Level 3000, Lords at Level 6000, Planet3arth at Level 4000. Major bosses such as Void and Void2 are normally NPC-only; the global 8B owner can play them.</div>
+    <div id="bossIndexGrid" class="boss-index-grid"></div>
+  </div>
+</div>
+
+<div id="codesOverlay" class="overlay hidden">
+  <div class="window compact">
+    <button class="x" data-close="codesOverlay">×</button>
+    <div class="section-head"><h2>CODES</h2><span>Global one-of-one owner key</span></div>
+    <p style="margin:10px 0 8px;opacity:.85">Enter a code below. <b>8B can be successfully claimed by exactly one player worldwide.</b> It grants <b>Level 8000 + Owner Access</b>. It does not equip or recolor any skin.</p>
+    <label style="display:grid;gap:8px;margin:14px 0">
+      <span style="font-weight:800;letter-spacing:.08em">ENTER CODE</span>
+      <input id="codeInput" autocomplete="off" autocapitalize="characters" spellcheck="false" maxlength="24" placeholder="8B" style="min-height:48px;font-size:20px;font-weight:900;letter-spacing:.12em;padding:10px 14px;border-radius:10px;border:1px solid #ffffff33;background:#091018;color:#fff;outline:none">
+    </label>
+    <button id="redeemCodeBtn" class="deploy" type="button" style="width:100%;min-height:48px">REDEEM CODE</button>
+    <p id="codeStatus" aria-live="polite" style="min-height:24px;margin:12px 0 0;font-weight:800">8B CAN BE CLAIMED BY EXACTLY ONE PLAYER WORLDWIDE • LEVEL 8000 + OWNER ACCESS.</p>
+  </div>
+</div>
+
+
+<div id="ownerOverlay" class="overlay hidden">
+  <div class="window owner-window">
+    <button class="x" data-close="ownerOverlay">×</button>
+    <div class="section-head"><h2>OWNER ACCESS</h2><span>8B worldwide owner tools • private custom builds</span></div>
+    <div class="owner-intro">
+      <div><b>OWNER CONTROL ONLINE</b><div class="owner-note">Jump waves mid-round, scale allied Towers with the wave, trigger Wave 0000000, play Major bosses, and build private custom Towers/Zombies saved only in this browser.</div></div>
+      <span id="ownerBuildCount" class="owner-badge">0/15 TOWERS • 0/15 ZOMBIES</span>
+    </div>
+
+    <div class="owner-grid">
+      <section class="owner-panel">
+        <h3>LIVE ROUND CONTROL</h3>
+        <div id="ownerRoundStatus" class="owner-note" style="margin-bottom:9px">Start a round to use live Owner controls.</div>
+        <div class="owner-world-grid">
+          <label>Set Wave<input id="ownerWave" type="number" min="1" max="40" value="1"></label>
+          <button id="ownerApplyWave" class="owner-accent" type="button">JUMP TO WAVE + SCALE TOWERS</button>
+          <button id="ownerRareWave" class="owner-accent owner-span2" type="button">START RARE WAVE 0000000</button>
+          <label class="owner-span2">Become Major Boss<select id="ownerMajorSelect"></select></label>
+          <button id="ownerBecomeMajor" class="owner-accent owner-span2" type="button">BECOME SELECTED MAJOR</button>
+        </div>
+        <p class="owner-note">Wave jumps clear the current NPC horde, start the chosen wave immediately, and raise allied/current Tower upgrades to match late-game progression instead of leaving Wave 4-strength Towers on Wave 32.</p>
+
+        <h3 style="margin-top:18px">MY PRIVATE BUILDS</h3>
+        <div id="ownerBuildList" class="owner-save-list"></div>
+      </section>
+
+      <section class="owner-panel">
+        <div class="owner-builder-top"><h3>TOWER / ZOMBIE BUILDER</h3><div><button id="ownerNewBuild" type="button">NEW</button> <button id="ownerSaveBuild" class="owner-accent" type="button">SAVE BUILD</button></div></div>
+        <div class="owner-build-layout">
+          <div>
+            <div class="owner-form-grid">
+              <label>Build Type<select id="ownerBuildTeam"><option value="tower">Tower</option><option value="zombie">Zombie</option></select></label>
+              <label>Name<input id="ownerBuildName" maxlength="28" value="My Scout"></label>
+              <label>Base Color<input id="ownerBaseColor" type="color" value="#58a8ff"></label>
+              <label>Accent / Head Color<input id="ownerAccentColor" type="color" value="#ffffff"></label>
+              <label>HP<input id="ownerHp" type="number" min="1" max="2000000" value="125"></label>
+              <label>Speed<input id="ownerSpeed" type="number" min="40" max="800" value="280"></label>
+              <label>Damage<input id="ownerDamage" type="number" min="1" max="100000" value="22"></label>
+              <label>Attack Cooldown (sec)<input id="ownerRate" type="number" min="0.03" max="10" step="0.01" value="0.14"></label>
+              <label>Cost<input id="ownerCost" type="number" min="0" max="99999999" value="0"></label>
+              <label>Unlock Wave<input id="ownerUnlockWave" type="number" min="0" max="40" value="0"></label>
+
+              <label data-owner-tower-only>Weapon<select id="ownerGun"><option value="rifle">Rifle</option><option value="shotgun">Shotgun</option><option value="sniper">Sniper</option><option value="minigun">Minigun</option><option value="beam">Beam</option><option value="rail">Rail</option><option value="rocket">Rocket</option><option value="ram">Melee / Ram</option></select></label>
+              <label data-owner-tower-only>Range<input id="ownerRange" type="number" min="50" max="2500" value="800"></label>
+              <label data-owner-tower-only>Magazine<input id="ownerMag" type="number" min="1" max="999" value="30"></label>
+              <label data-owner-tower-only>Reload (sec)<input id="ownerReload" type="number" min="0" max="10" step="0.05" value="1.35"></label>
+              <label data-owner-tower-only>Upgrade Base Cost<input id="ownerUpgradeBase" type="number" min="1" max="9999999" value="250"></label>
+
+              <label data-owner-zombie-only class="hidden">Zombie Class<select id="ownerBuildKind"><option value="NORMAL">Normal</option><option value="BOSS">Boss</option><option value="KING">King</option><option value="LORD">Lord</option><option value="MAJOR">Major Boss</option><option value="FINAL">Final Boss</option></select></label>
+              <label data-owner-zombie-only class="hidden">Reuse Cooldown<input id="ownerRespawnCooldown" type="number" min="0" max="300" step="1" value="0"></label>
+              <label data-owner-zombie-only class="hidden">Boss / Final Timer<input id="ownerBossTimer" type="number" min="15" max="1800" value="180"></label>
+
+              <label>Q Ability<select id="ownerQAbility"><option value="dash">Dash</option><option value="heal">Heal</option><option value="shield">Shield</option><option value="burst">Overdrive</option><option value="barrage">Barrage</option><option value="stomp">Stomp</option><option value="lunge">Lunge</option><option value="frenzy">Frenzy</option><option value="summon">Summon Built Zombie</option></select></label>
+              <label>Q Cooldown<input id="ownerQCooldown" type="number" min="0.1" max="300" step="0.1" value="6"></label>
+              <label>E Ability<select id="ownerEAbility"><option value="burst">Overdrive</option><option value="dash">Dash</option><option value="heal">Heal</option><option value="shield">Shield</option><option value="barrage">Barrage</option><option value="stomp">Stomp</option><option value="lunge">Lunge</option><option value="frenzy">Frenzy</option><option value="summon">Summon Built Zombie</option></select></label>
+              <label>E Cooldown<input id="ownerECooldown" type="number" min="0.1" max="300" step="0.1" value="13"></label>
+              <label class="owner-span2">Summon Target (for Summon ability)<select id="ownerSummonTarget"><option value="">None</option></select></label>
+              <label class="owner-span2">Summon Count<input id="ownerSummonCount" type="number" min="1" max="6" value="1"></label>
+            </div>
+          </div>
+
+          <div class="owner-preview-wrap">
+            <canvas id="ownerPreview" width="360" height="270" aria-label="Custom unit preview"></canvas>
+            <h4>DECORATION SHAPES</h4>
+            <div class="owner-shape-editor">
+              <label>Shape<select id="ownerShapeKind"><option value="rect">Rectangle</option><option value="circle">Circle</option><option value="triangle">Triangle</option><option value="diamond">Diamond</option></select></label>
+              <label>Color<input id="ownerShapeColor" type="color" value="#ffffff"></label>
+              <label>X<input id="ownerShapeX" type="number" min="-80" max="80" value="0"></label>
+              <label>Y<input id="ownerShapeY" type="number" min="-110" max="110" value="0"></label>
+              <label>Width<input id="ownerShapeW" type="number" min="3" max="160" value="20"></label>
+              <label>Height<input id="ownerShapeH" type="number" min="3" max="160" value="20"></label>
+              <label>Rotation<input id="ownerShapeRot" type="number" min="-180" max="180" value="0"></label>
+            </div>
+            <div><button id="ownerAddShape" type="button">ADD SHAPE</button> <button id="ownerDeleteShape" class="owner-danger" type="button">DELETE SELECTED SHAPE</button></div>
+            <div id="ownerShapeList" class="owner-shape-list"></div>
+            <p class="owner-note">Tap a saved shape, then change X/Y, width/height, rotation, shape type, or color. Up to 24 decoration shapes per build. Custom builds are local/private and appear only in your Owner roster. Their configured cost, unlock wave, cooldowns, and upgrade costs are real; Owner Access does not silently bypass your custom balance settings.</p>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+</div>
+
+<div id="settingsOverlay" class="overlay hidden">
+  <div class="window settings-window">
+    <button class="x" data-close="settingsOverlay">×</button>
+    <div class="section-head">
+      <h2>SETTINGS</h2>
+      <span>Yes. It actually goes to 2000%. 😭</span>
+    </div>
+
+    <div class="settings-section">
+      <h3>AUDIO</h3>
+
+      <label class="slider-row">
+        <span><b>MASTER VOLUME</b><small>Everything</small></span>
+        <input id="masterVolume" type="range" min="0" max="2000" step="10" value="100">
+        <output id="masterVolumeOut">100%</output>
+      </label>
+
+      <label class="slider-row">
+        <span><b>MUSIC VOLUME</b><small>Lobby, battle and boss music</small></span>
+        <input id="musicVolume" type="range" min="0" max="2000" step="10" value="100">
+        <output id="musicVolumeOut">100%</output>
+      </label>
+
+      <label class="slider-row">
+        <span><b>SFX VOLUME</b><small>Weapons, hits, UI, bosses and abilities</small></span>
+        <input id="sfxVolume" type="range" min="0" max="2000" step="10" value="100">
+        <output id="sfxVolumeOut">100%</output>
+      </label>
+
+      <div class="settings-buttons">
+        <button id="audioTestBtn">TEST SOUND</button>
+        <button id="audioResetBtn">RESET AUDIO</button>
+      </div>
+      <p class="setting-note">The extreme boost runs through a limiter so 2000% does not just become raw digital clipping.</p>
+    </div>
+
+    <div class="settings-section">
+      <h3>GAMEPLAY</h3>
+      <label class="slider-row">
+        <span><b>CAMERA SHAKE</b><small>0% = none, 200% = maximum</small></span>
+        <input id="shakeSetting" type="range" min="0" max="200" step="5" value="100">
+        <output id="shakeSettingOut">100%</output>
+      </label>
+      <label class="toggle-row">
+        <span><b>DAMAGE NUMBERS</b><small>Show damage above enemies</small></span>
+        <input id="damageNumbersSetting" type="checkbox" checked>
+      </label>
+    </div>
+  </div>
+</div>
+
+<div id="results" class="overlay hidden">
+  <div class="window result-window">
+    <div id="resultTag" class="result-tag">VICTORY</div>
+    <h1 id="resultTitle">VOID2 DEFEATED</h1>
+    <p id="resultSummary"></p>
+    <div class="results-grid six">
+      <div><small>PERSONAL XP</small><b id="resultXp">+0</b></div>
+      <div><small>TOWER REWARD</small><b id="resultTowerReward">—</b></div>
+      <div><small>ZOMBIE REWARD</small><b id="resultZombieReward">—</b></div>
+      <div><small>SECRET SKIN</small><b id="resultSkin">—</b></div>
+      <div><small>CANDY</small><b id="resultCandy">+0</b></div>
+      <div><small>LEAVES</small><b id="resultLeaves">+0</b></div>
+    </div>
+    <button id="returnBtn" class="deploy">RETURN TO LOBBY</button>
+  </div>
+</div>
+
+<div id="mobile" class="mobile hidden">
+  <div id="moveStick" class="stick"><i></i></div>
+  <div id="aimStick" class="stick aim"><i></i></div>
+  <button id="mobileQ">Q</button>
+  <button id="mobileE">E</button>
+  <button id="mobileR">R</button>
+  <button id="mobileUpgrade">UPGRADE</button>
+  <button id="mobileRoster">☰</button>
+</div>
+
+<script src="game.js"></script>
+</body>
+</html>
